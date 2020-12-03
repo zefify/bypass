@@ -1,0 +1,99 @@
+local bypass = false
+local LocalPlayer = game.Players.LocalPlayer
+local mouse = LocalPlayer:GetMouse()
+local fakemodel = Instance.new("Model")
+fakemodel.Parent = game.Workspace
+local meta = getrawmetatable(game) -- rip free exploits :sob:
+setreadonly(meta,false)
+local namecall = meta.__namecall
+local newindex = meta.__newindex
+local index = meta.__index
+function notification(text)
+	game.StarterGui:SetCore("SendNotification", {
+    Title = "valerie";
+    Text = text;
+    Icon = "rbxassetid://0";
+    Duration = 2;
+    })
+end
+meta.__namecall=function(self,...)
+    if not checkcaller() then
+        local Args={...}
+        local method = getnamecallmethod()
+        if string.lower(method) == "waitforchild" then
+            if Args[1] == "HumanoidRootPart" then
+                if bypass then
+                    Args[1] = "Torso"
+                    return namecall(self,unpack(Args))
+                end
+            end
+        end
+        if string.lower(method) == "findfirstchild" then
+            if Args[1] == "HumanoidRootPart" then
+                if bypass then
+                    Args[1] = "Torso"
+                end
+            end
+        end
+    end
+    if checkcaller() then
+        local Args={...}
+        local method = getnamecallmethod()
+        if string.lower(method) == "findfirstchild" then
+            if Args[1] ~= nil then
+                if Args[1] == "HumanoidRootPart" then
+                    return namecall(self,unpack(Args))
+                end
+            end
+        end
+    end
+    return namecall(self,...)
+end
+meta.__index=function(self,k)
+    local Script=getfenv(2).script
+    if checkcaller() then
+        if k == "HumanoidRootPart" and tostring(t)==tostring(player) then
+            if bypass then
+                if getcallingscript then
+                    if getcallingscript() ~= script then
+                        return index(self,"Torso")
+                    end
+                else
+                    if get_calling_script(2) ~= script then
+                        return index(self,"Torso")
+                    end
+                end
+            end
+        end
+    end
+    return index(self,k)
+end
+
+
+
+mouse.KeyDown:Connect(function(key)
+    if key == "b" then
+        bypass = not bypass
+		if bypass == true then
+		game.Players.LocalPlayer.Character:BreakJoints()
+		notification("bypass on!")
+		end
+		if bypass == false then
+		game.Players.LocalPlayer.Character:BreakJoints()
+		notification("bypass off!")
+		end
+    end
+end)
+
+
+  	game.Players.LocalPlayer.Character:BreakJoints()
+    bypass = true
+		
+game:GetService('RunService').Stepped:connect(function()
+    if bypass then
+            local Root = game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+            if Root then
+                game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart").Parent = nil
+            end
+    end
+end)
